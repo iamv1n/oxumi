@@ -1,0 +1,39 @@
+{
+  "default": "anthropic:claude-sonnet-5-5",
+  "providers": [
+    {
+      "id": "anthropic",
+      "label": "Anthropic",
+      "type": "anthropic",
+      "models": [
+        {
+          "id": "claude-opus-5-5",
+          "label": "Claude Opus 5.5"
+        },
+        {
+          "id": "claude-sonnet-5-5",
+          "label": "Claude Sonnet 5.5"
+        },
+        {
+          "id": "claude-haiku-5-5",
+          "label": "Claude Haiku 5.5 (fastest)"
+        }
+      ]
+    },
+    {
+      "id": "openai",
+      "label": "OpenAI",
+      "type": "openai-compatible",
+      "models": "auto",
+      "autoFilter": "^(gpt-|o\\d|chatgpt-)"
+    },
+    {
+      "id": "gemini",
+      "label": "Google Gemini",
+      "type": "openai-compatible",
+      "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "models": "auto",
+      "autoFilter": "^gemini-"
+    }
+  ]
+}

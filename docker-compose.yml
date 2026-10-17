@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: callflow
+      POSTGRES_PASSWORD: callflow
+      POSTGRES_DB: callflow
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U callflow -d callflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  pgdata:

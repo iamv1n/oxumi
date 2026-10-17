@@ -1,0 +1,36 @@
+{
+  "id": "opd-appointment-confirmation",
+  "name": "OPD appointment confirmation",
+  "description": "Confirms, reschedules or cancels an upcoming outpatient appointment.",
+  "settings": {
+    "persona": "You are the front-desk assistant of a clinic, calling a patient about an upcoming appointment. Be polite and unhurried. You only handle scheduling: never give medical advice, and if asked, say the doctor will discuss it at the visit.",
+    "languages": ["hi", "en"],
+    "maxAttempts": 2,
+    "maxDurationSec": 180
+  },
+  "variables": [
+    { "name": "patient_name", "description": "Patient's name", "example": "Sunita Sharma" },
+    { "name": "clinic", "description": "Clinic name", "example": "Aarogya Clinic" },
+    { "name": "doctor", "description": "Doctor's name", "example": "Dr. Mehta" },
+    { "name": "appointment_time", "description": "Appointment date and time", "example": "tomorrow at 11 am" }
+  ],
+  "fields": [
+    { "name": "decision", "type": "enum", "options": ["confirm", "reschedule", "cancel"], "description": "What the patient wants to do with the appointment" },
+    { "name": "preferred_slot", "type": "string", "description": "Day and time the patient would prefer instead, as they said it" },
+    { "name": "cancel_reason", "type": "string", "description": "Why the patient is cancelling, if they are willing to say", "required": false }
+  ],
+  "start": "greeting",
+  "nodes": [
+    { "id": "greeting", "type": "start", "say": "Namaste {{patient_name}} ji, this is the automated assistant from {{clinic}}, calling about your appointment with {{doctor}} {{appointment_time}}.", "next": "ask_decision" },
+    { "id": "ask_decision", "type": "ask", "fields": ["decision"], "guidance": "Ask whether they will come at that time, or would like to change or cancel it.", "next": "route" },
+    { "id": "route", "type": "branch", "branches": [
+      { "when": { "field": "decision", "op": "eq", "value": "reschedule" }, "next": "ask_slot" },
+      { "when": { "field": "decision", "op": "eq", "value": "cancel" }, "next": "ask_reason" }
+    ], "default": "confirmed" },
+    { "id": "ask_slot", "type": "ask", "fields": ["preferred_slot"], "guidance": "Ask which day and time suits them. Do not promise the slot; the clinic will confirm it.", "next": "rescheduled" },
+    { "id": "ask_reason", "type": "ask", "fields": ["cancel_reason"], "guidance": "Ask once, gently, if they would like to share the reason. Accept a refusal.", "maxAttempts": 1, "next": "cancelled" },
+    { "id": "confirmed", "type": "end", "say": "Thank you, your appointment is confirmed. Please arrive ten minutes early.", "outcome": "completed" },
+    { "id": "rescheduled", "type": "end", "say": "Thank you, the clinic will confirm your new time by message.", "outcome": "completed" },
+    { "id": "cancelled", "type": "end", "say": "Your appointment has been cancelled. Take care.", "outcome": "completed" }
+  ]
+}

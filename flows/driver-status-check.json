@@ -1,0 +1,38 @@
+{
+  "id": "driver-status-check",
+  "name": "Truck driver status check",
+  "description": "Calls a driver mid-trip and records location, schedule and any issue.",
+  "settings": {
+    "persona": "You are a dispatch assistant checking in with a truck driver who is on the road. Drivers are busy and often on noisy highways, so be brief, warm and patient.",
+    "languages": ["hi", "en"],
+    "maxAttempts": 2,
+    "maxDurationSec": 240
+  },
+  "variables": [
+    { "name": "driver_name", "description": "Driver's first name", "example": "Ramesh" },
+    { "name": "company", "description": "Fleet operator the call is made for", "example": "Shakti Logistics" },
+    { "name": "route", "description": "Origin and destination", "example": "Nagpur to Hyderabad" },
+    { "name": "planned_eta", "description": "Planned arrival time", "example": "tonight at 9 pm" }
+  ],
+  "fields": [
+    { "name": "current_location", "type": "string", "description": "Where the truck is right now: a city, town or highway landmark" },
+    { "name": "on_schedule", "type": "boolean", "description": "Whether the driver expects to arrive by the planned time" },
+    { "name": "delay_reason", "type": "enum", "options": ["traffic", "breakdown", "loading_delay", "weather", "paperwork", "rest_stop", "other"], "description": "Main cause of the delay" },
+    { "name": "revised_eta", "type": "string", "description": "New expected arrival time, as the driver said it" },
+    { "name": "needs_help", "type": "boolean", "description": "Whether the driver has a problem that needs the office's help" },
+    { "name": "issue_details", "type": "string", "description": "What the problem is, in the driver's words" }
+  ],
+  "start": "greeting",
+  "nodes": [
+    { "id": "greeting", "type": "start", "say": "Namaste {{driver_name}} ji, this is the automated assistant from {{company}}, calling for a quick update on your {{route}} trip.", "next": "ask_location" },
+    { "id": "ask_location", "type": "ask", "fields": ["current_location"], "guidance": "A nearby town, toll plaza or highway number is enough. Do not ask for an exact address.", "next": "ask_schedule" },
+    { "id": "ask_schedule", "type": "ask", "fields": ["on_schedule"], "guidance": "The planned arrival is {{planned_eta}}. Ask whether they will reach by then.", "next": "check_schedule" },
+    { "id": "check_schedule", "type": "branch", "branches": [{ "when": { "field": "on_schedule", "op": "eq", "value": false }, "next": "ask_delay" }], "default": "ask_help" },
+    { "id": "ask_delay", "type": "ask", "fields": ["delay_reason", "revised_eta"], "guidance": "Ask what is causing the delay and when they now expect to arrive. Do not blame the driver.", "next": "ask_help" },
+    { "id": "ask_help", "type": "ask", "fields": ["needs_help"], "guidance": "Ask whether there is any problem with the vehicle, the load or the paperwork that the office should help with.", "next": "check_help" },
+    { "id": "check_help", "type": "branch", "branches": [{ "when": { "field": "needs_help", "op": "eq", "value": true }, "next": "ask_issue" }], "default": "goodbye" },
+    { "id": "ask_issue", "type": "ask", "fields": ["issue_details"], "guidance": "Let them describe it; one follow-up at most.", "next": "goodbye_help" },
+    { "id": "goodbye_help", "type": "end", "say": "Thank you, I have noted this and the office will call you shortly. Drive safe.", "outcome": "completed" },
+    { "id": "goodbye", "type": "end", "say": "Thank you, your update is recorded. Drive safe.", "outcome": "completed" }
+  ]
+}

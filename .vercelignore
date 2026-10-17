@@ -1,0 +1,17 @@
+# Never upload local secrets or development state.
+.env
+.env.*
+!.env.example
+.dev-credentials.key
+.dev-outbox.log
+node_modules
+.next
+.turbo
+dist
+*.tsbuildinfo
+plan.md
+# The brand kit is internal for now; only the link-preview image ships.
+apps/site/public/brand/designs
+apps/site/public/brand/social
+apps/site/public/brand/logo
+apps/site/public/brand/*.zip
